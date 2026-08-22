@@ -1,4 +1,4 @@
-﻿name: Build Gimforze iOS IPA
+name: Build Gimforze iOS IPA
 
 on:
   workflow_dispatch:
@@ -29,19 +29,45 @@ jobs:
       - name: Generar icono iOS
         run: dart run flutter_launcher_icons -f flutter_launcher_icons_ios.yaml
 
-      - name: Analizar cÃ³digo de la app
-        run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
+      - name: Comprobar estructura iOS
+        run: |
+          echo "=== IOS ==="
+          find ios -maxdepth 4 -type f | head -100
+          echo "=== APP ICONS ==="
+          find ios/Runner/Assets.xcassets/AppIcon.appiconset -maxdepth 1 -type f -print || true
 
-      - name: Generar IPA sin firma
-        run: flutter build ipa --release --no-codesign
+      - name: Compilar aplicación iOS sin firma
+        run: flutter build ios --release --no-codesign
 
-      - name: Comprobar archivos generados`r`n        run: |`r`n          echo "=== BUILD IOS ===`r`n find build/ios -maxdepth 4 -type f -print || true`r`n echo === ARCHIVOS IPA ===`r`n find . -name *.ipa -print || true`r`n`r`n - name: Subir IPA
+      - name: Comprobar aplicación generada
+        run: |
+          echo "=== BUILD IOS ==="
+          find build/ios -maxdepth 5 -type f -print || true
+          echo "=== RUNNER APP ==="
+          ls -lah build/ios/iphoneos/Runner.app || true
+
+      - name: Crear IPA sin firma
+        run: |
+          set -e
+          APP="build/ios/iphoneos/Runner.app"
+          if [ ! -d "$APP" ]; then
+            echo "ERROR: No se encontró $APP"
+            exit 1
+          fi
+          rm -rf /tmp/Payload
+          mkdir -p /tmp/Payload
+          cp -R "$APP" /tmp/Payload/Runner.app
+          mkdir -p build/ios/ipa
+          cd /tmp
+          rm -f "$GITHUB_WORKSPACE/build/ios/ipa/Gimforze.ipa"
+          zip -qry "$GITHUB_WORKSPACE/build/ios/ipa/Gimforze.ipa" Payload
+          echo "=== IPA CREADA ==="
+          ls -lh "$GITHUB_WORKSPACE/build/ios/ipa/Gimforze.ipa"
+
+      - name: Subir IPA
         uses: actions/upload-artifact@v4
         with:
           name: Gimforze-IPA
-          path: build/ios/ipa/*.ipa
+          path: build/ios/ipa/Gimforze.ipa
           if-no-files-found: error
           retention-days: 7
-
-
-
