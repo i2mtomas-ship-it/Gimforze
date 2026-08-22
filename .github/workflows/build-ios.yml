@@ -1,4 +1,4 @@
-name: Build Gimforze iOS IPA
+﻿name: Build Gimforze iOS IPA
 
 on:
   workflow_dispatch:
@@ -27,9 +27,9 @@ jobs:
         run: flutter pub get
 
       - name: Generar icono iOS
-        run: dart run flutter_launcher_icons
+        run: dart run flutter_launcher_icons -f flutter_launcher_icons_ios.yaml
 
-      - name: Analizar código de la app
+      - name: Analizar cÃ³digo de la app
         run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
 
       - name: Generar IPA sin firma
@@ -42,3 +42,4 @@ jobs:
           path: build/ios/ipa/*.ipa
           if-no-files-found: error
           retention-days: 7
+
