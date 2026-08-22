@@ -35,11 +35,13 @@ jobs:
       - name: Generar IPA sin firma
         run: flutter build ipa --release --no-codesign
 
-      - name: Subir IPA
+      - name: Comprobar archivos generados`r`n        run: |`r`n          echo "=== BUILD IOS ===`r`n find build/ios -maxdepth 4 -type f -print || true`r`n echo === ARCHIVOS IPA ===`r`n find . -name *.ipa -print || true`r`n`r`n - name: Subir IPA
         uses: actions/upload-artifact@v4
         with:
           name: Gimforze-IPA
           path: build/ios/ipa/*.ipa
           if-no-files-found: error
           retention-days: 7
+
+
 
