@@ -1,0 +1,44 @@
+name: Build Gimforze iOS IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Instalar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Comprobar Flutter
+        run: flutter --version
+
+      - name: Crear plataforma iOS
+        run: flutter create --platforms ios .
+
+      - name: Instalar dependencias
+        run: flutter pub get
+
+      - name: Generar icono iOS
+        run: dart run flutter_launcher_icons
+
+      - name: Analizar código de la app
+        run: flutter analyze lib --no-fatal-infos --no-fatal-warnings
+
+      - name: Generar IPA sin firma
+        run: flutter build ipa --release --no-codesign
+
+      - name: Subir IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gimforze-IPA
+          path: build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 7
